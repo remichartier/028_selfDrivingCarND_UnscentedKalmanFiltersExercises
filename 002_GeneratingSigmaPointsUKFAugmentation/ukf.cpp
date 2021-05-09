@@ -16,6 +16,41 @@ void UKF::Init() {
 
 }
 
+/**
+ *     •  https://youtu.be/5p-PqtxQeM8
+    •     • Let’s put the augmentation into C++ code.
+    • Now the dimension of the augmented state is 7.
+    • Other things you will need are the variance of the longitudinal acceleration and the yaw acceleration.
+    • Together, they build the process noise covariance matrix which we call Q.
+    • The rest is almost the same as in the last session.
+    • But this time you have to build the augmented state mean x_aug, and the augmented covariance matrix P_aug.
+    • Look at cheat sheet, it will also help you here.
+    • When you build the augmented mean state, consider that the mean value of the acceleration noises are both zero.
+    • And this is where the augmented Sigma points go.
+    • Pay attention to the dimensions of this matrix.
+
+ */
+
+// compilation : g++ main.cpp ukf.cpp -o main.exe
+
+/* Dense not found --> due to Eigen files/lib not installed 
+  From : https://eigen.tuxfamily.org/dox/GettingStarted.html
+   Compiling and running your first program
+  There is no library to link to. The only thing that you need to keep in mind when compiling the above program is that the compiler must be able to find the Eigen header files. The directory in which you placed Eigen's source code must be in the include path. With GCC you use the -I option to achieve this, so you can compile the program with a command like this:
+
+  g++ -I /path/to/eigen/ my_program.cpp -o my_program 
+  On Linux or Mac OS X, another option is to symlink or copy the Eigen folder into /usr/local/include/. This way, you can compile the program with:
+
+  g++ my_program.cpp -o my_program 
+  
+  https://askubuntu.com/questions/860207/how-to-install-eigen-3-3-in-ubuntu-14-04
+  For those simply requiring a reasonably recent version of Eigen 3 on Ubuntu
+   and similar Debian-based distros (...which is the common case), installing 
+   the existing libeigen3-dev package suffices: e.g.,
+
+  sudo apt install libeigen3-dev
+
+*/
 
 /**
  * Programming assignment functions: 
