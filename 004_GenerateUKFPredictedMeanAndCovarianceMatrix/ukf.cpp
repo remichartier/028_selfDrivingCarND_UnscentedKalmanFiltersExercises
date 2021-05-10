@@ -16,6 +16,34 @@ void UKF::Init() {
 
 }
 
+/**
+       • https://youtu.be/0vl_wfDpVec
+    • 2 objects we want to calculate : the mean predicted state X and the state prediction covariance P.
+    • Start with already have the predicted sigma points. 
+
+ */
+
+// compilation : g++ main.cpp ukf.cpp -o main.exe
+
+/* Dense not found --> due to Eigen files/lib not installed 
+  From : https://eigen.tuxfamily.org/dox/GettingStarted.html
+   Compiling and running your first program
+  There is no library to link to. The only thing that you need to keep in mind when compiling the above program is that the compiler must be able to find the Eigen header files. The directory in which you placed Eigen's source code must be in the include path. With GCC you use the -I option to achieve this, so you can compile the program with a command like this:
+
+  g++ -I /path/to/eigen/ my_program.cpp -o my_program 
+  On Linux or Mac OS X, another option is to symlink or copy the Eigen folder into /usr/local/include/. This way, you can compile the program with:
+
+  g++ my_program.cpp -o my_program 
+  
+  https://askubuntu.com/questions/860207/how-to-install-eigen-3-3-in-ubuntu-14-04
+  For those simply requiring a reasonably recent version of Eigen 3 on Ubuntu
+   and similar Debian-based distros (...which is the common case), installing 
+   the existing libeigen3-dev package suffices: e.g.,
+
+  sudo apt install libeigen3-dev
+
+*/
+
 
 /**
  * Programming assignment functions: 
@@ -56,10 +84,24 @@ void UKF::PredictMeanAndCovariance(VectorXd* x_out, MatrixXd* P_out) {
    */
 
   // set weights
-
+  weights(0) = lambda / (lambda + n_aug);
+  for(int i=1; i<2 * n_aug + 1; i++){
+  	weights(i) = 0.5/(lambda + n_aug);
+  }
   // predict state mean
+  x = weights(0) * Xsig_pred.col(0);
+  for(int i=1; i<2 * n_aug + 1; i++){
+  	x = x + (weights(i) * Xsig_pred.col(i));
+  }
 
   // predict state covariance matrix
+  VectorXd a = VectorXd(n_x);
+  a = Xsig_pred.col(0) - x;
+  P = weights(0) * a * (a.transpose());
+  for(int i=1; i<2 * n_aug + 1; i++){
+  	a = Xsig_pred.col(i) - x;
+  	P = P + (weights(i) * a * (a.transpose()));
+  }
 
   /**
    * Student part end
@@ -75,3 +117,18 @@ void UKF::PredictMeanAndCovariance(VectorXd* x_out, MatrixXd* P_out) {
   *x_out = x;
   *P_out = P;
 }
+
+/* Obtained : 
+Predicted state
+ 5.93637
+ 1.49035
+ 2.20528
+0.536853
+0.353577
+Predicted covariance matrix
+ 0.00543425  -0.0024053  0.00341576 -0.00348196 -0.00299378
+ -0.0024053    0.010845   0.0014923  0.00980182  0.00791091
+ 0.00341576   0.0014923  0.00580129 0.000778632 0.000792973
+-0.00348196  0.00980182 0.000778632   0.0119238   0.0112491
+-0.00299378  0.00791091 0.000792973   0.0112491   0.0126972
+*/
