@@ -8,4 +8,5 @@ Quiz/Exercises done during Udacity Self-Driving Car Nanodegree extra-curriculum 
 
 - 003_GeneratingSigmaPointsUKFPredictions : Predict the UKF Sigma points for the CTRV model.
 
+- 004_GenerateUKFPredictedMeanAndCovarianceMatrix : 2 objects we want to calculate : the mean predicted state X and the state prediction covariance P.
 
