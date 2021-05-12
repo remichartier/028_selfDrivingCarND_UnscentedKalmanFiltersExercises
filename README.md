@@ -10,3 +10,5 @@ Quiz/Exercises done during Udacity Self-Driving Car Nanodegree extra-curriculum 
 
 - 004_GenerateUKFPredictedMeanAndCovarianceMatrix : 2 objects we want to calculate : the mean predicted state X and the state prediction covariance P.
 
+- 005_GenerateUKFPredictedMeasurementMeanCovarienceMatrix : Coding Quiz to predict the mean and the covariance of a radar measurement. 2 output objects : z_pred mean predicted measurement, and S the predicted covariance matrix S.
+
