@@ -14,50 +14,7 @@ UKF::~UKF() {
 void UKF::Init() {
 
 }
-/**
-     • https://youtu.be/f36o4sCEQvY
-    • Last coding quiz before the project.
-    • We want to calculate this time the updated state x and the updated 
-    covariance matrix P.
-    • We need a lot of pre-calculated data this time.
-    • Given : 
-        ◦ Predicted Sigma points in the state space Xsig_pred.
-        ◦ Predicted state mean : x, and state prediction covariance P.
-    • You can use this variable x again, and override it later with the 
-    updated state.
-    • The same is true for P, override this one with the updated covariance 
-    matrix.
-    • Zsig : predicted Sigma Points in the measurement space.
-    • z_pred : predicted measurement mean and covariance of the measurement 
-    prediction.
-    • z : values for the actual measurement.
-    • Matrix Tc : here you can store your intermediate results for Cross
-     Correlation matrix T.
-    • Again, make sure to use the variable x and P to store your updated
-     state and your updated Covariance matrix.  
 
- */
-
-// compilation : g++ main.cpp ukf.cpp -o main.exe
-
-/* Dense not found --> due to Eigen files/lib not installed 
-  From : https://eigen.tuxfamily.org/dox/GettingStarted.html
-   Compiling and running your first program
-  There is no library to link to. The only thing that you need to keep in mind when compiling the above program is that the compiler must be able to find the Eigen header files. The directory in which you placed Eigen's source code must be in the include path. With GCC you use the -I option to achieve this, so you can compile the program with a command like this:
-
-  g++ -I /path/to/eigen/ my_program.cpp -o my_program 
-  On Linux or Mac OS X, another option is to symlink or copy the Eigen folder into /usr/local/include/. This way, you can compile the program with:
-
-  g++ my_program.cpp -o my_program 
-  
-  https://askubuntu.com/questions/860207/how-to-install-eigen-3-3-in-ubuntu-14-04
-  For those simply requiring a reasonably recent version of Eigen 3 on Ubuntu
-   and similar Debian-based distros (...which is the common case), installing 
-   the existing libeigen3-dev package suffices: e.g.,
-
-  sudo apt install libeigen3-dev
-
-*/
 /**
  * Programming assignment functions: 
  */
@@ -149,17 +106,37 @@ void UKF::UpdateState(VectorXd* x_out, MatrixXd* P_out) {
    */
 
   // calculate cross correlation matrix
-  Tc.Zero(n_x, n_z);
-  for (int i=0; i<2*n_aug+1; ++i) {  
-    Tc = Tc + weights(i) * (Xsig_pred.col(i) -x)*((Zsig.col(i) -z_pred).transpose());
+  Tc.fill(0.0);
+  for (int i = 0; i < 2 * n_aug + 1; ++i) {  // 2n+1 simga points
+    // residual
+    VectorXd z_diff = Zsig.col(i) - z_pred;
+    // angle normalization
+    while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
+    while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
+
+    // state difference
+    VectorXd x_diff = Xsig_pred.col(i) - x;
+    // angle normalization
+    while (x_diff(3)> M_PI) x_diff(3)-=2.*M_PI;
+    while (x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
+
+    Tc = Tc + weights(i) * x_diff * z_diff.transpose();
   }
 
-  // calculate Kalman gain K;
-  MatrixXd K = MatrixXd(n_x, n_z);
-  K = Tc * S.inverse();
+  // Kalman gain K;
+  MatrixXd K = Tc * S.inverse();
+
+  // residual
+  VectorXd z_diff = z - z_pred;
+
+  // angle normalization
+  while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
+  while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
+
   // update state mean and covariance matrix
-  x = x + K * (z - z_pred);
-  P = P - K * S * (K.transpose());
+  x = x + K * z_diff;
+  P = P - K*S*K.transpose();
+
   /**
    * Student part end
    */
@@ -173,18 +150,22 @@ void UKF::UpdateState(VectorXd* x_out, MatrixXd* P_out) {
   *P_out = P;
 }
 
-/* Results obtained : 
-./main.exe
-Updated state x: 
- 5.92276
- 1.41823
- 2.15593
-0.489274
-0.321338
-Updated state covariance P: 
-  0.00361579 -0.000357881   0.00208316 -0.000937196  -0.00071727
--0.000357881   0.00539867   0.00156846   0.00455342   0.00358885
-  0.00208316   0.00156846   0.00410651   0.00160333   0.00171811
--0.000937196   0.00455342   0.00160333   0.00652634   0.00669436
- -0.00071719   0.00358884   0.00171811   0.00669426   0.00881797
-*/
+/**
+ * expected result x:
+ * x =
+ *  5.92276
+ *  1.41823
+ *  2.15593
+ * 0.489274
+ * 0.321338
+ */
+
+/**
+ * expected result P:
+ * P =
+ *   0.00361579 -0.000357881   0.00208316 -0.000937196  -0.00071727
+ * -0.000357881   0.00539867   0.00156846   0.00455342   0.00358885
+ *   0.00208316   0.00156846   0.00410651   0.00160333   0.00171811
+ * -0.000937196   0.00455342   0.00160333   0.00652634   0.00669436
+ *  -0.00071719   0.00358884   0.00171811   0.00669426   0.00881797
+ */
